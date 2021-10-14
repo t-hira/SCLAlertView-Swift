@@ -954,7 +954,7 @@ open class SCLAlertView: UIViewController {
                     
                     _ = addButton(completeText ?? localizedDone, target:self, selector:#selector(SCLAlertView.hideView))
                     
-                    // ボタン以外の部分をタップすると閉じる
+                    // ボタンやテキストフィールド以外の部分をタップすると閉じる
                     baseView.isUserInteractionEnabled = true
                     baseView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SCLAlertView.hideView)))
                     
@@ -1101,7 +1101,7 @@ open class SCLAlertView: UIViewController {
                 
                 _ = addButton(completeText ?? localizedDone, target:self, selector:#selector(SCLAlertView.hideView))
                 
-                // ボタン以外の部分をタップすると閉じる
+                // ボタンやテキストフィールド以外の部分をタップすると閉じる
                 baseView.isUserInteractionEnabled = true
                 baseView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SCLAlertView.hideView)))
                 
