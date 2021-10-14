@@ -954,10 +954,6 @@ open class SCLAlertView: UIViewController {
                     
                     _ = addButton(completeText ?? localizedDone, target:self, selector:#selector(SCLAlertView.hideView))
                     
-                    // ボタンやテキストフィールド以外の部分をタップすると閉じる
-                    baseView.isUserInteractionEnabled = true
-                    baseView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SCLAlertView.hideView)))
-                    
                 }
                 
                 //hidden/show circular view based on the ui option
@@ -1100,10 +1096,6 @@ open class SCLAlertView: UIViewController {
                 let localizedDone = Bundle(for: UIApplication.self).localizedString(forKey: "Done", value: nil, table: nil)
                 
                 _ = addButton(completeText ?? localizedDone, target:self, selector:#selector(SCLAlertView.hideView))
-                
-                // ボタンやテキストフィールド以外の部分をタップすると閉じる
-                baseView.isUserInteractionEnabled = true
-                baseView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SCLAlertView.hideView)))
                 
             }
             
