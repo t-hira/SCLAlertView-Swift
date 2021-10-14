@@ -799,7 +799,7 @@ open class SCLAlertView: UIViewController {
     //Dismiss keyboard when tapped outside textfield & close SCLAlertView when hideWhenBackgroundViewIsTapped
     @objc func tapped(_ gestureRecognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
-        
+        baseView.frame = view.frame // ←表示してから回転するとBaseViewタップ判定がおかしくなるので追加
         if let tappedView = gestureRecognizer.view , tappedView.hitTest(gestureRecognizer.location(in: tappedView), with: nil) == baseView && appearance.hideWhenBackgroundViewIsTapped {
             
             hideView()
