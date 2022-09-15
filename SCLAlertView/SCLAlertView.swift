@@ -653,12 +653,14 @@ open class SCLAlertView: UIViewController {
         txt.font = appearance.kTextFont
         txt.autocapitalizationType = UITextAutocapitalizationType.words
         txt.clearButtonMode = UITextField.ViewMode.whileEditing
-        
+        txt.backgroundColor = .clear
+
         txt.layer.masksToBounds = true
         txt.layer.borderWidth = 1.0
         
         if title != nil {
-            txt.placeholder = title!
+            //txt.placeholder = title!
+            txt.attributedPlaceholder = NSAttributedString(string: title!, attributes: [NSAttributedString.Key.foregroundColor : UIColor.gray])
         }
         
         contentView.addSubview(txt)
