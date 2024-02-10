@@ -654,6 +654,7 @@ open class SCLAlertView: UIViewController {
         txt.autocapitalizationType = UITextAutocapitalizationType.words
         txt.clearButtonMode = UITextField.ViewMode.whileEditing
         txt.backgroundColor = .clear
+        txt.textColor = .black
 
         txt.layer.masksToBounds = true
         txt.layer.borderWidth = 1.0
