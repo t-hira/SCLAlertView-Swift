@@ -33,24 +33,24 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
 public enum SCLAlertViewStyle {
     case success, error, notice, warning, info, edit, wait, question
     
-    public var defaultColorInt: UInt {
+    public var defaultColor: UIColor {
         switch self {
         case .success:
-            return 0x22B573
+            return UIColorFromRGB(0x22B573)
         case .error:
-            return 0xC1272D
+            return .init(light: UIColorFromRGB(0xC1272D), dark: .red)
         case .notice:
-            return 0x727375
+            return .init(light: UIColorFromRGB(0x727375), dark: UIColorFromRGB(0xC6C6C6))
         case .warning:
-            return 0xFFD110
+            return UIColorFromRGB(0xFFD110)
         case .info:
-            return 0x2866BF
+            return .init(light: UIColorFromRGB(0x2866BF), dark: UIColorFromRGB(0x6ABCE7))
         case .edit:
-            return 0xA429FF
+            return .init(light: UIColorFromRGB(0xA429FF), dark: UIColorFromRGB(0xD194FF))
         case .wait:
-            return 0xD62DA5
+            return UIColorFromRGB(0xD62DA5)
         case .question:
-            return 0x727375
+            return .init(light: UIColorFromRGB(0x727375), dark: UIColorFromRGB(0xBABABA))
         }
         
     }
@@ -147,14 +147,14 @@ open class SCLAlertView: UIViewController {
         let kCircleHeight: CGFloat
         let kCircleIconHeight: CGFloat
         let kTitleHeight:CGFloat
-    let kTitleMinimumScaleFactor: CGFloat
+	let kTitleMinimumScaleFactor: CGFloat
         let kWindowWidth: CGFloat
         var kWindowHeight: CGFloat
         var kTextHeight: CGFloat
         let kTextFieldHeight: CGFloat
         let kTextViewdHeight: CGFloat
         let kButtonHeight: CGFloat
-        let circleBackgroundColor: UIColor
+		let circleBackgroundColor: UIColor
         let contentViewColor: UIColor
         let contentViewBorderColor: UIColor
         let titleColor: UIColor
@@ -218,7 +218,7 @@ open class SCLAlertView: UIViewController {
         // Activity indicator
         var activityIndicatorStyle: UIActivityIndicatorView.Style
         
-        public init(kDefaultShadowOpacity: CGFloat = 0.7, kCircleTopPosition: CGFloat = 0.0, kCircleBackgroundTopPosition: CGFloat = 6.0, kCircleHeight: CGFloat = 56.0, kCircleIconHeight: CGFloat = 20.0, kTitleHeight:CGFloat = 25.0,  kWindowWidth: CGFloat = 240.0, kWindowHeight: CGFloat = 178.0, kTextHeight: CGFloat = 90.0, kTextFieldHeight: CGFloat = 30.0, kTextViewdHeight: CGFloat = 80.0, kButtonHeight: CGFloat = 35.0, kTitleFont: UIFont = UIFont.systemFont(ofSize: 20), kTitleMinimumScaleFactor: CGFloat = 1.0, kTextFont: UIFont = UIFont.systemFont(ofSize: 14), kButtonFont: UIFont = UIFont.boldSystemFont(ofSize: 14), showCloseButton: Bool = true, showCircularIcon: Bool = true, shouldAutoDismiss: Bool = true, contentViewCornerRadius: CGFloat = 5.0, fieldCornerRadius: CGFloat = 3.0, buttonCornerRadius: CGFloat = 3.0, hideWhenBackgroundViewIsTapped: Bool = false, circleBackgroundColor: UIColor = UIColor.white, contentViewColor: UIColor = UIColorFromRGB(0xFFFFFF), contentViewBorderColor: UIColor = UIColorFromRGB(0xCCCCCC), titleColor: UIColor = UIColorFromRGB(0x4D4D4D), subTitleColor: UIColor = UIColorFromRGB(0x4D4D4D), margin: Margin = Margin(), dynamicAnimatorActive: Bool = false, disableTapGesture: Bool = false, buttonsLayout: SCLAlertButtonLayout = .vertical, activityIndicatorStyle: UIActivityIndicatorView.Style = .white, textViewAlignment: NSTextAlignment = .center) {
+        public init(kDefaultShadowOpacity: CGFloat = 0.7, kCircleTopPosition: CGFloat = 0.0, kCircleBackgroundTopPosition: CGFloat = 6.0, kCircleHeight: CGFloat = 56.0, kCircleIconHeight: CGFloat = 20.0, kTitleHeight:CGFloat = 25.0,  kWindowWidth: CGFloat = 240.0, kWindowHeight: CGFloat = 178.0, kTextHeight: CGFloat = 90.0, kTextFieldHeight: CGFloat = 30.0, kTextViewdHeight: CGFloat = 80.0, kButtonHeight: CGFloat = 35.0, kTitleFont: UIFont = UIFont.systemFont(ofSize: 20), kTitleMinimumScaleFactor: CGFloat = 1.0, kTextFont: UIFont = UIFont.systemFont(ofSize: 14), kButtonFont: UIFont = UIFont.boldSystemFont(ofSize: 14), showCloseButton: Bool = true, showCircularIcon: Bool = true, shouldAutoDismiss: Bool = true, contentViewCornerRadius: CGFloat = 5.0, fieldCornerRadius: CGFloat = 3.0, buttonCornerRadius: CGFloat = 3.0, hideWhenBackgroundViewIsTapped: Bool = false, circleBackgroundColor: UIColor? = nil, contentViewColor: UIColor? = nil, contentViewBorderColor: UIColor = UIColorFromRGB(0xCCCCCC), titleColor: UIColor? = nil, subTitleColor: UIColor? = nil, margin: Margin = Margin(), dynamicAnimatorActive: Bool = false, disableTapGesture: Bool = false, buttonsLayout: SCLAlertButtonLayout = .vertical, activityIndicatorStyle: UIActivityIndicatorView.Style = UIActivityIndicatorView.Style.medium, textViewAlignment: NSTextAlignment = .center) {
             
             self.kDefaultShadowOpacity = kDefaultShadowOpacity
             self.kCircleTopPosition = kCircleTopPosition
@@ -232,11 +232,11 @@ open class SCLAlertView: UIViewController {
             self.kTextFieldHeight = kTextFieldHeight
             self.kTextViewdHeight = kTextViewdHeight
             self.kButtonHeight = kButtonHeight
-            self.circleBackgroundColor = circleBackgroundColor
-            self.contentViewColor = contentViewColor
+            self.circleBackgroundColor = circleBackgroundColor ?? .defaultBackgroundColor
+            self.contentViewColor = contentViewColor ?? .defaultBackgroundColor
             self.contentViewBorderColor = contentViewBorderColor
-            self.titleColor = titleColor
-            self.subTitleColor = subTitleColor
+            self.titleColor = titleColor ?? .defaultTitleColor
+            self.subTitleColor = subTitleColor ?? .defaultSubTitleColor
         
             self.margin = margin
         
@@ -314,6 +314,9 @@ open class SCLAlertView: UIViewController {
     fileprivate var input = [UITextView]()
     internal var buttons = [SCLButton]()
     fileprivate var selfReference: SCLAlertView?
+    private var style: SCLAlertViewStyle!
+    private var isUsingDefaultIconImage = true
+    private var window: UIWindow!
     
     public init(appearance: SCLAppearance) {
         self.appearance = appearance
@@ -343,7 +346,7 @@ open class SCLAlertView: UIViewController {
         // Set up main view
         view.frame = UIScreen.main.bounds
         view.autoresizingMask = [UIView.AutoresizingMask.flexibleHeight, UIView.AutoresizingMask.flexibleWidth]
-        view.backgroundColor = UIColor(red:0, green:0, blue:0, alpha:appearance.kDefaultShadowOpacity)
+        view.backgroundColor = UIColor(red:0, green:0, blue:0, alpha: isShowing() ? 0 : appearance.kDefaultShadowOpacity)
         view.addSubview(baseView)
         // Base View
         baseView.frame = view.frame
@@ -398,230 +401,114 @@ open class SCLAlertView: UIViewController {
         guard !keyboardHasBeenShown else {
             return
         }
-        if #available(iOS 13.0, *) {
-            if let rv = Array(UIApplication.shared.connectedScenes).compactMap({ $0 as? UIWindowScene }).flatMap({ $0.windows }).first(where: { $0.isKeyWindow }){
-                //let rv = UIApplication.shared.windows.filter({$0.isKeyWindow}).first! as UIWindow
-                let sz = rv.frame.size
-                
-                // Set background frame
-                view.frame.size = sz
+	    
+        let sz = window.frame.size
+        
+        // Set background frame
+        view.frame.size = sz
 
-                let defaultTopOffset: CGFloat = 32
+        let defaultTopOffset: CGFloat = 32
 
-                // get actual height of title text
-                var titleActualHeight: CGFloat = 0
-                if let title = labelTitle.text {
-                  titleActualHeight = title.heightWithConstrainedWidth(width: subViewsWidth, font: labelTitle.font) + 10
-                  // get the larger height for the title text
-                  titleActualHeight = (titleActualHeight > appearance.kTitleHeight ? titleActualHeight : appearance.kTitleHeight)
-                }
+        // get actual height of title text
+        var titleActualHeight: CGFloat = 0
+        if let title = labelTitle.text {
+          titleActualHeight = title.heightWithConstrainedWidth(width: subViewsWidth, font: labelTitle.font) + 10
+          // get the larger height for the title text
+          titleActualHeight = (titleActualHeight > appearance.kTitleHeight ? titleActualHeight : appearance.kTitleHeight)
+        }
 
-                // computing the right size to use for the textView
-                let maxHeight = sz.height - 100 // max overall height
-                var consumedHeight = CGFloat(0)
-                consumedHeight += (titleActualHeight > 0 ? appearance.margin.titleTop + titleActualHeight : defaultTopOffset)
-                consumedHeight += appearance.margin.bottom
-                
-                let buttonMargin = appearance.margin.buttonSpacing
-                let textFieldMargin = appearance.margin.textFieldSpacing
-                if appearance.buttonsLayout == .vertical {
-                    consumedHeight += appearance.kButtonHeight * CGFloat(buttons.count)
-                    consumedHeight += buttonMargin * (CGFloat(buttons.count) - 1)
-                } else {
-                    consumedHeight += appearance.kButtonHeight
-                }
-                consumedHeight += (appearance.kTextFieldHeight + textFieldMargin) * CGFloat(inputs.count)
-                consumedHeight += appearance.kTextViewdHeight * CGFloat(input.count)
-                let maxViewTextHeight = maxHeight - consumedHeight
-                let viewTextWidth = subViewsWidth
-                var viewTextHeight = appearance.kTextHeight
-                
-                // Check if there is a custom subview and add it over the textview
-                if let customSubview = customSubview {
-                    viewTextHeight = min(customSubview.frame.height, maxViewTextHeight)
-                    viewText.text = ""
-                    viewText.addSubview(customSubview)
-                } else if viewText.text.isEmpty {
-                    viewTextHeight = 0
-                } else {
-                    // computing the right size to use for the textView
-                    let suggestedViewTextSize = viewText.sizeThatFits(CGSize(width: viewTextWidth, height: CGFloat.greatestFiniteMagnitude))
-                    viewTextHeight = min(suggestedViewTextSize.height, maxViewTextHeight)
-                    
-                    // scroll management
-                    if (suggestedViewTextSize.height > maxViewTextHeight) {
-                        viewText.isScrollEnabled = true
-                    } else {
-                        viewText.isScrollEnabled = false
-                    }
-                }
-                
-                var windowHeight = consumedHeight + viewTextHeight
-                windowHeight += viewText.text.isEmpty ? 0 : appearance.margin.textViewBottom // only viewText.text is not empty should have margin.
-
-                // Set frames
-                var x = (sz.width - appearance.kWindowWidth) / 2
-                var y = (sz.height - windowHeight - (appearance.kCircleHeight / 8)) / 2
-                contentView.frame = CGRect(x:x, y:y, width:appearance.kWindowWidth, height:windowHeight)
-                contentView.layer.cornerRadius = appearance.contentViewCornerRadius
-                y -= kCircleHeightBackground * 0.6
-                x = (sz.width - kCircleHeightBackground) / 2
-                circleBG.frame = CGRect(x:x, y:y+appearance.kCircleBackgroundTopPosition, width:kCircleHeightBackground, height:kCircleHeightBackground)
-                
-                //adjust Title frame based on circularIcon show/hide flag
-        //        let titleOffset : CGFloat = appearance.showCircularIcon ? 0.0 : -12.0
-                let titleOffset: CGFloat = 0
-                labelTitle.frame = labelTitle.frame.offsetBy(dx: 0, dy: titleOffset)
-                
-                // Subtitle
-                y = titleActualHeight > 0 ? appearance.margin.titleTop + titleActualHeight + titleOffset : defaultTopOffset
-                viewText.frame = CGRect(x:appearance.margin.horizontal, y:y, width: viewTextWidth, height:viewTextHeight)
-                // Text fields
-                y += viewTextHeight
-                y += viewText.text.isEmpty ? 0 : appearance.margin.textViewBottom // only viewText.text is not empty should have margin.
-              
-                for txt in inputs {
-                    txt.frame = CGRect(x:appearance.margin.horizontal, y:y, width:subViewsWidth, height:appearance.kTextFieldHeight)
-                    txt.layer.cornerRadius = appearance.fieldCornerRadius
-                    y += appearance.kTextFieldHeight + textFieldMargin
-                }
-                for txt in input {
-                    txt.frame = CGRect(x:appearance.margin.horizontal, y:y, width:subViewsWidth, height:appearance.kTextViewdHeight - appearance.margin.textViewBottom)
-                    //txt.layer.cornerRadius = fieldCornerRadius
-                    y += appearance.kTextViewdHeight
-                }
-                // Buttons
-                var buttonX = appearance.margin.horizontal
-                switch appearance.buttonsLayout {
-                case .vertical:
-                    for btn in buttons {
-                        btn.frame = CGRect(x:buttonX, y:y, width:subViewsWidth, height:appearance.kButtonHeight)
-                        btn.layer.cornerRadius = appearance.buttonCornerRadius
-                        y += appearance.kButtonHeight + buttonMargin
-                    }
-                case .horizontal:
-                  let numberOfButton = CGFloat(buttons.count)
-                  let buttonsSpace = numberOfButton >= 1 ? CGFloat(10) * (numberOfButton - 1) : 0
-                  let widthEachButton = (subViewsWidth - buttonsSpace) / numberOfButton
-                    for btn in buttons {
-                        btn.frame = CGRect(x:buttonX, y:y, width: widthEachButton, height:appearance.kButtonHeight)
-                        btn.layer.cornerRadius = appearance.buttonCornerRadius
-                        buttonX += widthEachButton
-                        buttonX += buttonsSpace
-                    }
-                }
-            }
+        // computing the right size to use for the textView
+        let maxHeight = sz.height - 100 // max overall height
+        var consumedHeight = CGFloat(0)
+        consumedHeight += (titleActualHeight > 0 ? appearance.margin.titleTop + titleActualHeight : defaultTopOffset)
+        consumedHeight += appearance.margin.bottom
+        
+        let buttonMargin = appearance.margin.buttonSpacing
+        let textFieldMargin = appearance.margin.textFieldSpacing
+        if appearance.buttonsLayout == .vertical {
+            consumedHeight += appearance.kButtonHeight * CGFloat(buttons.count)
+            consumedHeight += buttonMargin * (CGFloat(buttons.count) - 1)
         } else {
-            // Fallback on earlier versions(旧バージョン用)
-            let rv = UIApplication.shared.windows.filter({$0.isKeyWindow}).first! as UIWindow
-            let sz = rv.frame.size
-            
-            // Set background frame
-            view.frame.size = sz
-
-            let defaultTopOffset: CGFloat = 32
-
-            // get actual height of title text
-            var titleActualHeight: CGFloat = 0
-            if let title = labelTitle.text {
-              titleActualHeight = title.heightWithConstrainedWidth(width: subViewsWidth, font: labelTitle.font) + 10
-              // get the larger height for the title text
-              titleActualHeight = (titleActualHeight > appearance.kTitleHeight ? titleActualHeight : appearance.kTitleHeight)
-            }
-
+            consumedHeight += appearance.kButtonHeight
+        }
+        consumedHeight += (appearance.kTextFieldHeight + textFieldMargin) * CGFloat(inputs.count)
+        consumedHeight += appearance.kTextViewdHeight * CGFloat(input.count)
+        let maxViewTextHeight = maxHeight - consumedHeight
+        let viewTextWidth = subViewsWidth
+        var viewTextHeight = appearance.kTextHeight
+        
+        // Check if there is a custom subview and add it over the textview
+        if let customSubview = customSubview {
+            viewTextHeight = min(customSubview.frame.height, maxViewTextHeight)
+            viewText.text = ""
+            viewText.addSubview(customSubview)
+        } else if viewText.text.isEmpty {
+            viewTextHeight = 0
+        } else {
             // computing the right size to use for the textView
-            let maxHeight = sz.height - 100 // max overall height
-            var consumedHeight = CGFloat(0)
-            consumedHeight += (titleActualHeight > 0 ? appearance.margin.titleTop + titleActualHeight : defaultTopOffset)
-            consumedHeight += appearance.margin.bottom
+            let suggestedViewTextSize = viewText.sizeThatFits(CGSize(width: viewTextWidth, height: CGFloat.greatestFiniteMagnitude))
+            viewTextHeight = min(suggestedViewTextSize.height, maxViewTextHeight)
             
-            let buttonMargin = appearance.margin.buttonSpacing
-            let textFieldMargin = appearance.margin.textFieldSpacing
-            if appearance.buttonsLayout == .vertical {
-                consumedHeight += appearance.kButtonHeight * CGFloat(buttons.count)
-                consumedHeight += buttonMargin * (CGFloat(buttons.count) - 1)
+            // scroll management
+            if (suggestedViewTextSize.height > maxViewTextHeight) {
+                viewText.isScrollEnabled = true
             } else {
-                consumedHeight += appearance.kButtonHeight
+                viewText.isScrollEnabled = false
             }
-            consumedHeight += (appearance.kTextFieldHeight + textFieldMargin) * CGFloat(inputs.count)
-            consumedHeight += appearance.kTextViewdHeight * CGFloat(input.count)
-            let maxViewTextHeight = maxHeight - consumedHeight
-            let viewTextWidth = subViewsWidth
-            var viewTextHeight = appearance.kTextHeight
-            
-            // Check if there is a custom subview and add it over the textview
-            if let customSubview = customSubview {
-                viewTextHeight = min(customSubview.frame.height, maxViewTextHeight)
-                viewText.text = ""
-                viewText.addSubview(customSubview)
-            } else if viewText.text.isEmpty {
-                viewTextHeight = 0
-            } else {
-                // computing the right size to use for the textView
-                let suggestedViewTextSize = viewText.sizeThatFits(CGSize(width: viewTextWidth, height: CGFloat.greatestFiniteMagnitude))
-                viewTextHeight = min(suggestedViewTextSize.height, maxViewTextHeight)
-                
-                // scroll management
-                if (suggestedViewTextSize.height > maxViewTextHeight) {
-                    viewText.isScrollEnabled = true
-                } else {
-                    viewText.isScrollEnabled = false
-                }
-            }
-            
-            var windowHeight = consumedHeight + viewTextHeight
-            windowHeight += viewText.text.isEmpty ? 0 : appearance.margin.textViewBottom // only viewText.text is not empty should have margin.
+        }
+        
+        var windowHeight = consumedHeight + viewTextHeight
+        windowHeight += viewText.text.isEmpty ? 0 : appearance.margin.textViewBottom // only viewText.text is not empty should have margin.
 
-            // Set frames
-            var x = (sz.width - appearance.kWindowWidth) / 2
-            var y = (sz.height - windowHeight - (appearance.kCircleHeight / 8)) / 2
-            contentView.frame = CGRect(x:x, y:y, width:appearance.kWindowWidth, height:windowHeight)
-            contentView.layer.cornerRadius = appearance.contentViewCornerRadius
-            y -= kCircleHeightBackground * 0.6
-            x = (sz.width - kCircleHeightBackground) / 2
-            circleBG.frame = CGRect(x:x, y:y+appearance.kCircleBackgroundTopPosition, width:kCircleHeightBackground, height:kCircleHeightBackground)
-            
-            //adjust Title frame based on circularIcon show/hide flag
-    //        let titleOffset : CGFloat = appearance.showCircularIcon ? 0.0 : -12.0
-            let titleOffset: CGFloat = 0
-            labelTitle.frame = labelTitle.frame.offsetBy(dx: 0, dy: titleOffset)
-            
-            // Subtitle
-            y = titleActualHeight > 0 ? appearance.margin.titleTop + titleActualHeight + titleOffset : defaultTopOffset
-            viewText.frame = CGRect(x:appearance.margin.horizontal, y:y, width: viewTextWidth, height:viewTextHeight)
-            // Text fields
-            y += viewTextHeight
-            y += viewText.text.isEmpty ? 0 : appearance.margin.textViewBottom // only viewText.text is not empty should have margin.
-          
-            for txt in inputs {
-                txt.frame = CGRect(x:appearance.margin.horizontal, y:y, width:subViewsWidth, height:appearance.kTextFieldHeight)
-                txt.layer.cornerRadius = appearance.fieldCornerRadius
-                y += appearance.kTextFieldHeight + textFieldMargin
+        // Set frames
+        var x = (sz.width - appearance.kWindowWidth) / 2
+        var y = (sz.height - windowHeight - (appearance.kCircleHeight / 8)) / 2
+        contentView.frame = CGRect(x:x, y:y, width:appearance.kWindowWidth, height:windowHeight)
+        contentView.layer.cornerRadius = appearance.contentViewCornerRadius
+        y -= kCircleHeightBackground * 0.6
+        x = (sz.width - kCircleHeightBackground) / 2
+        circleBG.frame = CGRect(x:x, y:y+appearance.kCircleBackgroundTopPosition, width:kCircleHeightBackground, height:kCircleHeightBackground)
+        
+        //adjust Title frame based on circularIcon show/hide flag
+//        let titleOffset : CGFloat = appearance.showCircularIcon ? 0.0 : -12.0
+        let titleOffset: CGFloat = 0
+        labelTitle.frame = labelTitle.frame.offsetBy(dx: 0, dy: titleOffset)
+        
+        // Subtitle
+        y = titleActualHeight > 0 ? appearance.margin.titleTop + titleActualHeight + titleOffset : defaultTopOffset
+        viewText.frame = CGRect(x:appearance.margin.horizontal, y:y, width: viewTextWidth, height:viewTextHeight)
+        // Text fields
+        y += viewTextHeight
+        y += viewText.text.isEmpty ? 0 : appearance.margin.textViewBottom // only viewText.text is not empty should have margin.
+      
+        for txt in inputs {
+            txt.frame = CGRect(x:appearance.margin.horizontal, y:y, width:subViewsWidth, height:appearance.kTextFieldHeight)
+            txt.layer.cornerRadius = appearance.fieldCornerRadius
+            y += appearance.kTextFieldHeight + textFieldMargin
+        }
+        for txt in input {
+            txt.frame = CGRect(x:appearance.margin.horizontal, y:y, width:subViewsWidth, height:appearance.kTextViewdHeight - appearance.margin.textViewBottom)
+            //txt.layer.cornerRadius = fieldCornerRadius
+            y += appearance.kTextViewdHeight
+        }
+        // Buttons
+        var buttonX = appearance.margin.horizontal
+        switch appearance.buttonsLayout {
+        case .vertical:
+            for btn in buttons {
+                btn.frame = CGRect(x:buttonX, y:y, width:subViewsWidth, height:appearance.kButtonHeight)
+                btn.layer.cornerRadius = appearance.buttonCornerRadius
+                y += appearance.kButtonHeight + buttonMargin
             }
-            for txt in input {
-                txt.frame = CGRect(x:appearance.margin.horizontal, y:y, width:subViewsWidth, height:appearance.kTextViewdHeight - appearance.margin.textViewBottom)
-                //txt.layer.cornerRadius = fieldCornerRadius
-                y += appearance.kTextViewdHeight
-            }
-            // Buttons
-            var buttonX = appearance.margin.horizontal
-            switch appearance.buttonsLayout {
-            case .vertical:
-                for btn in buttons {
-                    btn.frame = CGRect(x:buttonX, y:y, width:subViewsWidth, height:appearance.kButtonHeight)
-                    btn.layer.cornerRadius = appearance.buttonCornerRadius
-                    y += appearance.kButtonHeight + buttonMargin
-                }
-            case .horizontal:
-              let numberOfButton = CGFloat(buttons.count)
-              let buttonsSpace = numberOfButton >= 1 ? CGFloat(10) * (numberOfButton - 1) : 0
-              let widthEachButton = (subViewsWidth - buttonsSpace) / numberOfButton
-                for btn in buttons {
-                    btn.frame = CGRect(x:buttonX, y:y, width: widthEachButton, height:appearance.kButtonHeight)
-                    btn.layer.cornerRadius = appearance.buttonCornerRadius
-                    buttonX += widthEachButton
-                    buttonX += buttonsSpace
-                }
+        case .horizontal:
+          let numberOfButton = CGFloat(buttons.count)
+          let buttonsSpace = numberOfButton >= 1 ? CGFloat(10) * (numberOfButton - 1) : 0
+          let widthEachButton = (subViewsWidth - buttonsSpace) / numberOfButton
+            for btn in buttons {
+                btn.frame = CGRect(x:buttonX, y:y, width: widthEachButton, height:appearance.kButtonHeight)
+                btn.layer.cornerRadius = appearance.buttonCornerRadius
+                buttonX += widthEachButton
+                buttonX += buttonsSpace
             }
         }
     }
@@ -653,15 +540,12 @@ open class SCLAlertView: UIViewController {
         txt.font = appearance.kTextFont
         txt.autocapitalizationType = UITextAutocapitalizationType.words
         txt.clearButtonMode = UITextField.ViewMode.whileEditing
-        txt.backgroundColor = .clear
-        txt.textColor = .black
-
+        
         txt.layer.masksToBounds = true
         txt.layer.borderWidth = 1.0
         
         if title != nil {
-            //txt.placeholder = title!
-            txt.attributedPlaceholder = NSAttributedString(string: title!, attributes: [NSAttributedString.Key.foregroundColor : UIColor.gray])
+            txt.placeholder = title!
         }
         
         contentView.addSubview(txt)
@@ -674,7 +558,7 @@ open class SCLAlertView: UIViewController {
         appearance.setkWindowHeight(appearance.kWindowHeight + appearance.kTextViewdHeight)
         // Add text view
         let txt = UITextView()
-        // No placeholder with UITextView but you can use KMPlaceholderTextView library
+        // No placeholder with UITextView but you can use KMPlaceholderTextView library 
         txt.font = appearance.kTextFont
         //txt.autocapitalizationType = UITextAutocapitalizationType.Words
         //txt.clearButtonMode = UITextFieldViewMode.WhileEditing
@@ -802,7 +686,7 @@ open class SCLAlertView: UIViewController {
     //Dismiss keyboard when tapped outside textfield & close SCLAlertView when hideWhenBackgroundViewIsTapped
     @objc func tapped(_ gestureRecognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
-        baseView.frame = view.frame // ←表示してから回転するとBaseViewタップ判定がおかしくなるので追加
+        
         if let tappedView = gestureRecognizer.view , tappedView.hitTest(gestureRecognizer.location(in: tappedView), with: nil) == baseView && appearance.hideWhenBackgroundViewIsTapped {
             
             hideView()
@@ -811,364 +695,178 @@ open class SCLAlertView: UIViewController {
     
     // showCustom(view, title, subTitle, UIColor, UIImage)
     @discardableResult
-    open func showCustom(_ title: String, subTitle: String? = nil, color: UIColor, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
-        
-        color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        
-        var colorAsUInt32 : UInt32 = 0
-        colorAsUInt32 += UInt32(red * 255.0) << 16
-        colorAsUInt32 += UInt32(green * 255.0) << 8
-        colorAsUInt32 += UInt32(blue * 255.0)
-        
-        let colorAsUInt = UInt(colorAsUInt32)
-        
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .success, colorStyle: colorAsUInt, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showCustom(_ title: String, subTitle: String? = nil, color: UIColor, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .success, colorStyle: color, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showSuccess(view, title, subTitle)
     @discardableResult
-    open func showSuccess(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt=SCLAlertViewStyle.success.defaultColorInt, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .success, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showSuccess(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor=SCLAlertViewStyle.success.defaultColor, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .success, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showError(view, title, subTitle)
     @discardableResult
-    open func showError(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt=SCLAlertViewStyle.error.defaultColorInt, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .error, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showError(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor=SCLAlertViewStyle.error.defaultColor, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .error, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showNotice(view, title, subTitle)
     @discardableResult
-    open func showNotice(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt=SCLAlertViewStyle.notice.defaultColorInt, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .notice, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showNotice(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor=SCLAlertViewStyle.notice.defaultColor, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .notice, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showWarning(view, title, subTitle)
     @discardableResult
-    open func showWarning(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt=SCLAlertViewStyle.warning.defaultColorInt, colorTextButton: UInt=0x000000, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .warning, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showWarning(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor=SCLAlertViewStyle.warning.defaultColor, colorTextButton: UIColor = .black, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .warning, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showInfo(view, title, subTitle)
     @discardableResult
-    open func showInfo(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt=SCLAlertViewStyle.info.defaultColorInt, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .info, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showInfo(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor=SCLAlertViewStyle.info.defaultColor, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .info, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showWait(view, title, subTitle)
     @discardableResult
-    open func showWait(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt?=SCLAlertViewStyle.wait.defaultColorInt, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .wait, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showWait(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor?=SCLAlertViewStyle.wait.defaultColor, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .wait, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     @discardableResult
-    open func showEdit(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt=SCLAlertViewStyle.edit.defaultColorInt, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
-        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .edit, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+    open func showEdit(_ title: String, subTitle: String? = nil, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor=SCLAlertViewStyle.edit.defaultColor, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
+        return showTitle(title, subTitle: subTitle, timeout: timeout, completeText:closeButtonTitle, style: .edit, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showTitle(view, title, subTitle, style)
     @discardableResult
-    open func showTitle(_ title: String, subTitle: String? = nil, style: SCLAlertViewStyle, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UInt?=0x000000, colorTextButton: UInt=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
+    open func showTitle(_ title: String, subTitle: String? = nil, style: SCLAlertViewStyle, closeButtonTitle:String?=nil, timeout:SCLTimeoutConfiguration?=nil, colorStyle: UIColor = .black, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
         
-        return showTitle(title, subTitle: subTitle, timeout:timeout, completeText:closeButtonTitle, style: style, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle)
+        return showTitle(title, subTitle: subTitle, timeout:timeout, completeText:closeButtonTitle, style: style, colorStyle: colorStyle, colorTextButton: colorTextButton, circleIconImage: circleIconImage, animationStyle: animationStyle, window: window)
     }
     
     // showTitle(view, title, subTitle, timeout, style)
     @discardableResult
-    open func showTitle(_ title: String, subTitle: String? = nil, timeout: SCLTimeoutConfiguration?, completeText: String?, style: SCLAlertViewStyle, colorStyle: UInt?=0x000000, colorTextButton: UInt?=0xFFFFFF, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom) -> SCLAlertViewResponder {
+    open func showTitle(_ title: String, subTitle: String? = nil, timeout: SCLTimeoutConfiguration?, completeText: String?, style: SCLAlertViewStyle, colorStyle: UIColor? = .black, colorTextButton: UIColor? = nil, circleIconImage: UIImage? = nil, animationStyle: SCLAnimationStyle = .topToBottom, window: UIWindow? = nil) -> SCLAlertViewResponder {
         selfReference = self
         view.alpha = 0
         view.tag = uniqueTag
         view.accessibilityIdentifier = uniqueAccessibilityIdentifier
-        if #available(iOS 13.0, *) {
-            if let rv = Array(UIApplication.shared.connectedScenes).compactMap({ $0 as? UIWindowScene }).flatMap({ $0.windows }).first(where: { $0.isKeyWindow }){
-                //let rv = UIApplication.shared.windows.filter({$0.isKeyWindow}).first! as UIWindow
-                rv.addSubview(view)
-                view.frame = rv.bounds
-                baseView.frame = rv.bounds
-                
-                // Alert colour/icon
-                var iconImage: UIImage?
-                let colorInt = colorStyle ?? style.defaultColorInt
-                viewColor = UIColorFromRGB(colorInt)
-                
-                // Icon style
-                switch style {
-                case .success:
-                    
-                    iconImage = checkCircleIconImage(circleIconImage, defaultImage: SCLAlertViewStyleKit.imageOfCheckmark)
-                    
-                case .error:
-                    
-                    iconImage = checkCircleIconImage(circleIconImage, defaultImage: SCLAlertViewStyleKit.imageOfCross)
-                    
-                case .notice:
-                    
-                    iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfNotice)
-                    
-                case .warning:
-                    
-                    iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfWarning)
-                    
-                case .info:
-                    
-                    iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfInfo)
-                    
-                case .edit:
-                    
-                    iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfEdit)
-                    
-                case .wait:
-                    iconImage = nil
-                    
-                case .question:
-                    iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfQuestion)
-                }
-                
-                // Title
-                if !title.isEmpty {
-                    self.labelTitle.text = title
-                    let actualHeight = title.heightWithConstrainedWidth(width: subViewsWidth, font: self.labelTitle.font)
-                    self.labelTitle.frame = CGRect(x:appearance.margin.horizontal, y:appearance.margin.titleTop, width: subViewsWidth, height:actualHeight)
-                }
-                
-                // Subtitle
-                if let subTitle = subTitle,
-                  !subTitle.isEmpty {
-                    viewText.text = subTitle
-                    // Adjust text view size, if necessary
-                    let str = subTitle as NSString
-                    let attr = [NSAttributedString.Key.font:viewText.font ?? UIFont()]
-                    let sz = CGSize(width: subViewsWidth, height:90)
-                    let r = str.boundingRect(with: sz, options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes:attr, context:nil)
-                    let ht = ceil(r.size.height)
-                    if ht < appearance.kTextHeight {
-                        appearance.kWindowHeight -= (appearance.kTextHeight - ht)
-                        appearance.setkTextHeight(ht)
-                    }
-                }
-                
-                // Done button
-                if appearance.showCloseButton {
-                    
-                    // Retrieves the "done" word translated using Apple's UIKit dictionary
-                    let localizedDone = Bundle(for: UIApplication.self).localizedString(forKey: "Done", value: nil, table: nil)
-                    
-                    _ = addButton(completeText ?? localizedDone, target:self, selector:#selector(SCLAlertView.hideView))
-                    
-                }
-                
-                //hidden/show circular view based on the ui option
-                circleView.isHidden = !appearance.showCircularIcon
-                circleBG.isHidden = !appearance.showCircularIcon
-                
-                // Alert view colour and images
-                circleView.backgroundColor = viewColor
-                
-                // Spinner / icon
-                if style == .wait {
-                    let indicator = UIActivityIndicatorView(style: appearance.activityIndicatorStyle)
-                    indicator.startAnimating()
-                    circleIconView = indicator
-                }
-                else {
-                    if let iconTintColor = iconTintColor {
-                        circleIconView = UIImageView(image: iconImage!.withRenderingMode(.alwaysTemplate))
-                        circleIconView?.tintColor = iconTintColor
-                    }
-                    else {
-                        circleIconView = UIImageView(image: iconImage!)
-                    }
-                }
-                circleView.addSubview(circleIconView!)
-                let x = (appearance.kCircleHeight - appearance.kCircleIconHeight) / 2
-                circleIconView!.frame = CGRect( x: x, y: x, width: appearance.kCircleIconHeight, height: appearance.kCircleIconHeight)
-                circleIconView?.layer.masksToBounds = true
-                
-                for txt in inputs {
-                    txt.layer.borderColor = viewColor.cgColor
-                }
-                
-                for txt in input {
-                    txt.layer.borderColor = viewColor.cgColor
-                }
-                
-                for btn in buttons {
-                    if let customBackgroundColor = btn.customBackgroundColor {
-                        // Custom BackgroundColor set
-                        btn.backgroundColor = customBackgroundColor
-                    } else {
-                        // Use default BackgroundColor derived from AlertStyle
-                        btn.backgroundColor = viewColor
-                    }
-                    
-                    if let customTextColor = btn.customTextColor {
-                        // Custom TextColor set
-                        btn.setTitleColor(customTextColor, for: .normal)
-                    } else {
-                        // Use default BackgroundColor derived from AlertStyle
-                        btn.setTitleColor(UIColorFromRGB(colorTextButton ?? 0xFFFFFF), for: .normal)
-                    }
-                }
-                
-                // Adding timeout
-                if let timeout = timeout {
-                    self.timeout = timeout
-                    timeoutTimer?.invalidate()
-                    timeoutTimer = Timer.scheduledTimer(timeInterval: timeout.value, target: self, selector: #selector(SCLAlertView.hideViewTimeout), userInfo: nil, repeats: false)
-                    showTimeoutTimer?.invalidate()
-                    showTimeoutTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(SCLAlertView.updateShowTimeout), userInfo: nil, repeats: true)
-                }
-                
-                // Animate in the alert view
-                self.showAnimation(animationStyle)
-            }
-        } else {
-            // Fallback on earlier versions(旧バージョン用)
-            let rv = UIApplication.shared.windows.filter({$0.isKeyWindow}).first! as UIWindow
-            rv.addSubview(view)
-            view.frame = rv.bounds
-            baseView.frame = rv.bounds
-            
-            // Alert colour/icon
-            var iconImage: UIImage?
-            let colorInt = colorStyle ?? style.defaultColorInt
-            viewColor = UIColorFromRGB(colorInt)
-            
-            // Icon style
-            switch style {
-            case .success:
-                
-                iconImage = checkCircleIconImage(circleIconImage, defaultImage: SCLAlertViewStyleKit.imageOfCheckmark)
-                
-            case .error:
-                
-                iconImage = checkCircleIconImage(circleIconImage, defaultImage: SCLAlertViewStyleKit.imageOfCross)
-                
-            case .notice:
-                
-                iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfNotice)
-                
-            case .warning:
-                
-                iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfWarning)
-                
-            case .info:
-                
-                iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfInfo)
-                
-            case .edit:
-                
-                iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfEdit)
-                
-            case .wait:
-                iconImage = nil
-                
-            case .question:
-                iconImage = checkCircleIconImage(circleIconImage, defaultImage:SCLAlertViewStyleKit.imageOfQuestion)
-            }
-            
-            // Title
-            if !title.isEmpty {
-                self.labelTitle.text = title
-                let actualHeight = title.heightWithConstrainedWidth(width: subViewsWidth, font: self.labelTitle.font)
-                self.labelTitle.frame = CGRect(x:appearance.margin.horizontal, y:appearance.margin.titleTop, width: subViewsWidth, height:actualHeight)
-            }
-            
-            // Subtitle
-            if let subTitle = subTitle,
-              !subTitle.isEmpty {
-                viewText.text = subTitle
-                // Adjust text view size, if necessary
-                let str = subTitle as NSString
-                let attr = [NSAttributedString.Key.font:viewText.font ?? UIFont()]
-                let sz = CGSize(width: subViewsWidth, height:90)
-                let r = str.boundingRect(with: sz, options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes:attr, context:nil)
-                let ht = ceil(r.size.height)
-                if ht < appearance.kTextHeight {
-                    appearance.kWindowHeight -= (appearance.kTextHeight - ht)
-                    appearance.setkTextHeight(ht)
-                }
-            }
-            
-            // Done button
-            if appearance.showCloseButton {
-                
-                // Retrieves the "done" word translated using Apple's UIKit dictionary
-                let localizedDone = Bundle(for: UIApplication.self).localizedString(forKey: "Done", value: nil, table: nil)
-                
-                _ = addButton(completeText ?? localizedDone, target:self, selector:#selector(SCLAlertView.hideView))
-                
-            }
-            
-            //hidden/show circular view based on the ui option
-            circleView.isHidden = !appearance.showCircularIcon
-            circleBG.isHidden = !appearance.showCircularIcon
-            
-            // Alert view colour and images
-            circleView.backgroundColor = viewColor
-            
-            // Spinner / icon
-            if style == .wait {
-                let indicator = UIActivityIndicatorView(style: appearance.activityIndicatorStyle)
-                indicator.startAnimating()
-                circleIconView = indicator
-            }
-            else {
-                if let iconTintColor = iconTintColor {
-                    circleIconView = UIImageView(image: iconImage!.withRenderingMode(.alwaysTemplate))
-                    circleIconView?.tintColor = iconTintColor
-                }
-                else {
-                    circleIconView = UIImageView(image: iconImage!)
-                }
-            }
-            circleView.addSubview(circleIconView!)
-            let x = (appearance.kCircleHeight - appearance.kCircleIconHeight) / 2
-            circleIconView!.frame = CGRect( x: x, y: x, width: appearance.kCircleIconHeight, height: appearance.kCircleIconHeight)
-            circleIconView?.layer.masksToBounds = true
-            
-            for txt in inputs {
-                txt.layer.borderColor = viewColor.cgColor
-            }
-            
-            for txt in input {
-                txt.layer.borderColor = viewColor.cgColor
-            }
-            
-            for btn in buttons {
-                if let customBackgroundColor = btn.customBackgroundColor {
-                    // Custom BackgroundColor set
-                    btn.backgroundColor = customBackgroundColor
-                } else {
-                    // Use default BackgroundColor derived from AlertStyle
-                    btn.backgroundColor = viewColor
-                }
-                
-                if let customTextColor = btn.customTextColor {
-                    // Custom TextColor set
-                    btn.setTitleColor(customTextColor, for: .normal)
-                } else {
-                    // Use default BackgroundColor derived from AlertStyle
-                    btn.setTitleColor(UIColorFromRGB(colorTextButton ?? 0xFFFFFF), for: .normal)
-                }
-            }
-            
-            // Adding timeout
-            if let timeout = timeout {
-                self.timeout = timeout
-                timeoutTimer?.invalidate()
-                timeoutTimer = Timer.scheduledTimer(timeInterval: timeout.value, target: self, selector: #selector(SCLAlertView.hideViewTimeout), userInfo: nil, repeats: false)
-                showTimeoutTimer?.invalidate()
-                showTimeoutTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(SCLAlertView.updateShowTimeout), userInfo: nil, repeats: true)
-            }
-            
-            // Animate in the alert view
-            self.showAnimation(animationStyle)
+        let rv = window ?? UIApplication.shared.windows.filter({$0.isKeyWindow}).first ??
+            UIApplication.shared.windows.first!
+        self.window = rv
+        rv.addSubview(view)
+        view.frame = rv.bounds
+        baseView.frame = rv.bounds
+        self.style = style
         
+        // Alert colour
+        viewColor = colorStyle ?? style.defaultColor
+
+        // Title
+        if !title.isEmpty {
+            self.labelTitle.text = title
+            let actualHeight = title.heightWithConstrainedWidth(width: subViewsWidth, font: self.labelTitle.font)
+            self.labelTitle.frame = CGRect(x:appearance.margin.horizontal, y:appearance.margin.titleTop, width: subViewsWidth, height:actualHeight)
         }
         
+        // Subtitle
+        if let subTitle = subTitle,
+          !subTitle.isEmpty {
+            viewText.text = subTitle
+            // Adjust text view size, if necessary
+            let str = subTitle as NSString
+            let attr = [NSAttributedString.Key.font:viewText.font ?? UIFont()]
+            let sz = CGSize(width: subViewsWidth, height:90)
+            let r = str.boundingRect(with: sz, options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes:attr, context:nil)
+            let ht = ceil(r.size.height)
+            if ht < appearance.kTextHeight {
+                appearance.kWindowHeight -= (appearance.kTextHeight - ht)
+                appearance.setkTextHeight(ht)
+            }
+        }
+        
+        // Done button
+        if appearance.showCloseButton {
+            
+            // Retrieves the "done" word translated using Apple's UIKit dictionary
+            let localizedDone = Bundle(for: UIApplication.self).localizedString(forKey: "Done", value: nil, table: nil)
+            
+            _ = addButton(completeText ?? localizedDone, target:self, selector:#selector(SCLAlertView.hideView))
+        }
+        
+        //hidden/show circular view based on the ui option
+        circleView.isHidden = !appearance.showCircularIcon
+        circleBG.isHidden = !appearance.showCircularIcon
+        
+        // Alert view colour and images
+        circleView.backgroundColor = viewColor
+        
+        // Spinner / icon
+        if style == .wait {
+            let indicator = UIActivityIndicatorView(style: appearance.activityIndicatorStyle)
+            indicator.color = .defaultBackgroundColor
+            indicator.startAnimating()
+            circleIconView = indicator
+        }
+        else {
+            isUsingDefaultIconImage = circleIconImage == nil
+            let iconImage = circleIconImage ?? getIconImage()
+            if let iconTintColor = iconTintColor {
+                circleIconView = UIImageView(image: iconImage?.withRenderingMode(.alwaysTemplate))
+                circleIconView?.tintColor = iconTintColor
+            }
+            else {
+                circleIconView = UIImageView(image: iconImage)
+            }
+        }
+        circleView.addSubview(circleIconView!)
+        let x = (appearance.kCircleHeight - appearance.kCircleIconHeight) / 2
+        circleIconView!.frame = CGRect( x: x, y: x, width: appearance.kCircleIconHeight, height: appearance.kCircleIconHeight)
+        circleIconView?.layer.masksToBounds = true
+        
+        for txt in inputs {
+            txt.layer.borderColor = viewColor.cgColor
+        }
+        
+        for txt in input {
+            txt.layer.borderColor = viewColor.cgColor
+        }
+        
+        for btn in buttons {
+            if let customBackgroundColor = btn.customBackgroundColor {
+                // Custom BackgroundColor set
+                btn.backgroundColor = customBackgroundColor
+            } else {
+                // Use default BackgroundColor derived from AlertStyle
+                btn.backgroundColor = viewColor
+            }
+            
+            if let customTextColor = btn.customTextColor {
+                // Custom TextColor set
+                btn.setTitleColor(customTextColor, for: .normal)
+            } else {
+                if let colorTextButton = colorTextButton {
+                    btn.setTitleColor(colorTextButton, for: .normal)
+                } else {
+                    btn.setTitleColor(UIColor.defaultButtonTitleColor, for: .normal)
+                }
+            }
+        }
+        
+        // Adding timeout
+        if let timeout = timeout {
+            self.timeout = timeout
+            timeoutTimer?.invalidate()
+            timeoutTimer = Timer.scheduledTimer(timeInterval: timeout.value, target: self, selector: #selector(SCLAlertView.hideViewTimeout), userInfo: nil, repeats: false)
+            showTimeoutTimer?.invalidate()
+            showTimeoutTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(SCLAlertView.updateShowTimeout), userInfo: nil, repeats: true)
+        }
+        
+        // Animate in the alert view
+        self.showAnimation(animationStyle)
        
         // Chainable objects
         return SCLAlertViewResponder(alertview: self)
@@ -1177,102 +875,62 @@ open class SCLAlertView: UIViewController {
     // Show animation in the alert view
     fileprivate func showAnimation(_ animationStyle: SCLAnimationStyle = .topToBottom, animationStartOffset: CGFloat = -400.0, boundingAnimationOffset: CGFloat = 15.0, animationDuration: TimeInterval = 0.2) {
         
-        if #available(iOS 13.0, *) {
-            if let rv = Array(UIApplication.shared.connectedScenes).compactMap({ $0 as? UIWindowScene }).flatMap({ $0.windows }).first(where: { $0.isKeyWindow }){
-                //let rv = UIApplication.shared.windows.filter({$0.isKeyWindow}).first! as UIWindow
-                var animationStartOrigin = self.baseView.frame.origin
-                var animationCenter : CGPoint = rv.center
-                
-                switch animationStyle {
-                
-                case .noAnimation:
-                    self.view.alpha = 1.0
-                    return;
-                    
-                case .topToBottom:
-                    animationStartOrigin = CGPoint(x: animationStartOrigin.x, y: self.baseView.frame.origin.y + animationStartOffset)
-                    animationCenter = CGPoint(x: animationCenter.x, y: animationCenter.y + boundingAnimationOffset)
-                    
-                case .bottomToTop:
-                    animationStartOrigin = CGPoint(x: animationStartOrigin.x, y: self.baseView.frame.origin.y - animationStartOffset)
-                    animationCenter = CGPoint(x: animationCenter.x, y: animationCenter.y - boundingAnimationOffset)
-                    
-                case .leftToRight:
-                    animationStartOrigin = CGPoint(x: self.baseView.frame.origin.x + animationStartOffset, y: animationStartOrigin.y)
-                    animationCenter = CGPoint(x: animationCenter.x + boundingAnimationOffset, y: animationCenter.y)
-                    
-                case .rightToLeft:
-                    animationStartOrigin = CGPoint(x: self.baseView.frame.origin.x - animationStartOffset, y: animationStartOrigin.y)
-                    animationCenter = CGPoint(x: animationCenter.x - boundingAnimationOffset, y: animationCenter.y)
-                }
-                
-                self.baseView.frame.origin = animationStartOrigin
-                
-                if self.appearance.dynamicAnimatorActive {
-                    UIView.animate(withDuration: animationDuration, animations: {
-                        self.view.alpha = 1.0
-                    })
-                    self.animate(item: self.baseView, center: rv.center)
-                } else {
-                    UIView.animate(withDuration: animationDuration, animations: {
-                        self.view.alpha = 1.0
-                        self.baseView.center = animationCenter
-                    }, completion: { finished in
-                        UIView.animate(withDuration: animationDuration, animations: {
-                            self.view.alpha = 1.0
-                            self.baseView.center = rv.center
-                        })
-                    })
-                }
-                
-            }
-        } else {
-            // Fallback on earlier versions(旧バージョン用)
-            let rv = UIApplication.shared.windows.filter({$0.isKeyWindow}).first! as UIWindow
-            var animationStartOrigin = self.baseView.frame.origin
-            var animationCenter : CGPoint = rv.center
+        var animationStartOrigin = self.baseView.frame.origin
+        var animationCenter : CGPoint = window.center
+        
+        switch animationStyle {
+
+        case .noAnimation:
+            self.view.alpha = 1.0
+            return;
             
-            switch animationStyle {
+        case .topToBottom:
+            animationStartOrigin = CGPoint(x: animationStartOrigin.x, y: self.baseView.frame.origin.y + animationStartOffset)
+            animationCenter = CGPoint(x: animationCenter.x, y: animationCenter.y + boundingAnimationOffset)
             
-            case .noAnimation:
+        case .bottomToTop:
+            animationStartOrigin = CGPoint(x: animationStartOrigin.x, y: self.baseView.frame.origin.y - animationStartOffset)
+            animationCenter = CGPoint(x: animationCenter.x, y: animationCenter.y - boundingAnimationOffset)
+            
+        case .leftToRight:
+            animationStartOrigin = CGPoint(x: self.baseView.frame.origin.x + animationStartOffset, y: animationStartOrigin.y)
+            animationCenter = CGPoint(x: animationCenter.x + boundingAnimationOffset, y: animationCenter.y)
+            
+        case .rightToLeft:
+            animationStartOrigin = CGPoint(x: self.baseView.frame.origin.x - animationStartOffset, y: animationStartOrigin.y)
+            animationCenter = CGPoint(x: animationCenter.x - boundingAnimationOffset, y: animationCenter.y)
+        }
+
+        self.baseView.frame.origin = animationStartOrigin
+        
+        // When people call SCLAlertView from viewDidLoad of their root UIViewController
+        // on the app start we many end up with a non-key window and later our view will be covered
+        // by the view controller's view.
+        // The best we can do is to bring our view to front later.
+        let bringViewToFront = !window.isKeyWindow
+        
+        if self.appearance.dynamicAnimatorActive {
+            UIView.animate(withDuration: animationDuration, animations: { 
                 self.view.alpha = 1.0
-                return;
-                
-            case .topToBottom:
-                animationStartOrigin = CGPoint(x: animationStartOrigin.x, y: self.baseView.frame.origin.y + animationStartOffset)
-                animationCenter = CGPoint(x: animationCenter.x, y: animationCenter.y + boundingAnimationOffset)
-                
-            case .bottomToTop:
-                animationStartOrigin = CGPoint(x: animationStartOrigin.x, y: self.baseView.frame.origin.y - animationStartOffset)
-                animationCenter = CGPoint(x: animationCenter.x, y: animationCenter.y - boundingAnimationOffset)
-                
-            case .leftToRight:
-                animationStartOrigin = CGPoint(x: self.baseView.frame.origin.x + animationStartOffset, y: animationStartOrigin.y)
-                animationCenter = CGPoint(x: animationCenter.x + boundingAnimationOffset, y: animationCenter.y)
-                
-            case .rightToLeft:
-                animationStartOrigin = CGPoint(x: self.baseView.frame.origin.x - animationStartOffset, y: animationStartOrigin.y)
-                animationCenter = CGPoint(x: animationCenter.x - boundingAnimationOffset, y: animationCenter.y)
+            }) { _ in
+                if bringViewToFront {
+                    self.window.bringSubviewToFront(self.view)
+                }
             }
-            
-            self.baseView.frame.origin = animationStartOrigin
-            
-            if self.appearance.dynamicAnimatorActive {
-                UIView.animate(withDuration: animationDuration, animations: {
-                    self.view.alpha = 1.0
-                })
-                self.animate(item: self.baseView, center: rv.center)
-            } else {
-                UIView.animate(withDuration: animationDuration, animations: {
-                    self.view.alpha = 1.0
-                    self.baseView.center = animationCenter
+            self.animate(item: self.baseView, center: window.center)
+        } else {
+            UIView.animate(withDuration: animationDuration, animations: {
+                self.view.alpha = 1.0
+                 self.baseView.center = animationCenter
                 }, completion: { finished in
+                    if bringViewToFront {
+                        self.window.bringSubviewToFront(self.view)
+                    }
                     UIView.animate(withDuration: animationDuration, animations: {
                         self.view.alpha = 1.0
-                        self.baseView.center = rv.center
+                        self.baseView.center = self.window.center
                     })
-                })
-            }
+            })
         }
     }
     
@@ -1367,6 +1025,27 @@ open class SCLAlertView: UIViewController {
         }
         return false
     }
+
+    private func getIconImage() -> UIImage? {
+        switch style {
+        case .wait, .none:
+            return nil
+        case .success:
+            return SCLAlertViewStyleKit.imageOfCheckmark
+        case .error:
+            return SCLAlertViewStyleKit.imageOfCross
+        case .notice:
+            return SCLAlertViewStyleKit.imageOfNotice
+        case .warning:
+            return SCLAlertViewStyleKit.imageOfWarning
+        case .info:
+            return SCLAlertViewStyleKit.imageOfInfo
+        case .edit:
+            return SCLAlertViewStyleKit.imageOfEdit
+        case .question:
+            return SCLAlertViewStyleKit.imageOfQuestion
+        }
+    }
 }
 
 // Helper function to convert from RGB to UIColor
@@ -1426,8 +1105,7 @@ class SCLAlertViewStyleKit : NSObject {
         checkmarkShapePath.addCurve(to: CGPoint(x: 73.25, y: 14.05), controlPoint1: CGPoint(x: 75.52, y: 20.75), controlPoint2: CGPoint(x: 75.7, y: 16.65))
         checkmarkShapePath.close()
         checkmarkShapePath.miterLimit = 4;
-        
-        UIColor.white.setFill()
+        UIColor.black.setFill()
         checkmarkShapePath.fill()
     }
     
@@ -1440,7 +1118,7 @@ class SCLAlertViewStyleKit : NSObject {
         crossShapePath.addLine(to: CGPoint(x: 70, y: 70))
         crossShapePath.lineCapStyle = CGLineCap.round;
         crossShapePath.lineJoinStyle = CGLineJoin.round;
-        UIColor.white.setStroke()
+        UIColor.black.setStroke()
         crossShapePath.lineWidth = 14
         crossShapePath.stroke()
     }
@@ -1477,8 +1155,7 @@ class SCLAlertViewStyleKit : NSObject {
         noticeShapePath.addCurve(to: CGPoint(x: 72, y: 48.54), controlPoint1: CGPoint(x: 71.81, y: 51.29), controlPoint2: CGPoint(x: 72, y: 49.72))
         noticeShapePath.close()
         noticeShapePath.miterLimit = 4;
-        
-        UIColor.white.setFill()
+        UIColor.black.setFill()
         noticeShapePath.fill()
     }
     
@@ -1526,9 +1203,6 @@ class SCLAlertViewStyleKit : NSObject {
     }
     
     class func drawInfo() {
-        // Color Declarations
-        let color0 = UIColor(red: 1.000, green: 1.000, blue: 1.000, alpha: 1.000)
-        
         // Info Shape Drawing
         let infoShapePath = UIBezierPath()
         infoShapePath.move(to: CGPoint(x: 45.66, y: 15.96))
@@ -1547,14 +1221,11 @@ class SCLAlertViewStyleKit : NSObject {
         infoShapePath.addCurve(to: CGPoint(x: 48, y: 35.26), controlPoint1: CGPoint(x: 44.4, y: 27.67), controlPoint2: CGPoint(x: 48, y: 31.08))
         infoShapePath.addLine(to: CGPoint(x: 48, y: 69.41))
         infoShapePath.close()
-        color0.setFill()
+        UIColor.black.setFill()
         infoShapePath.fill()
     }
     
     class func drawEdit() {
-        // Color Declarations
-        let color = UIColor(red:1.0, green:1.0, blue:1.0, alpha:1.0)
-        
         // Edit shape Drawing
         let editPathPath = UIBezierPath()
         editPathPath.move(to: CGPoint(x: 71, y: 2.7))
@@ -1594,13 +1265,11 @@ class SCLAlertViewStyleKit : NSObject {
         editPathPath.close()
         editPathPath.miterLimit = 4;
         editPathPath.usesEvenOddFillRule = true;
-        color.setFill()
+        UIColor.black.setFill()
         editPathPath.fill()
     }
     
     class func drawQuestion() {
-        // Color Declarations
-        let color = UIColor(red: CGFloat(1.0), green: CGFloat(1.0), blue: CGFloat(1.0), alpha: CGFloat(1.0))
         // Questionmark Shape Drawing
         let questionShapePath = UIBezierPath()
         questionShapePath.move(to: CGPoint(x: CGFloat(33.75), y: CGFloat(54.1)))
@@ -1623,7 +1292,7 @@ class SCLAlertViewStyleKit : NSObject {
         questionShapePath.addLine(to: CGPoint(x: CGFloat(33.15), y: CGFloat(63.7)))
         questionShapePath.addLine(to: CGPoint(x: CGFloat(33.15), y: CGFloat(75.4)))
         questionShapePath.close()
-        color.setFill()
+        UIColor.black.setFill()
         questionShapePath.fill()
     }
     
@@ -1634,7 +1303,7 @@ class SCLAlertViewStyleKit : NSObject {
         }
         UIGraphicsBeginImageContextWithOptions(CGSize(width: 80, height: 80), false, 0)
         SCLAlertViewStyleKit.drawCheckmark()
-        Cache.imageOfCheckmark = UIGraphicsGetImageFromCurrentImageContext()
+        Cache.imageOfCheckmark = UIGraphicsGetImageFromCurrentImageContext()?.withTintColor(.systemBackground)
         UIGraphicsEndImageContext()
         return Cache.imageOfCheckmark!
     }
@@ -1645,7 +1314,7 @@ class SCLAlertViewStyleKit : NSObject {
         }
         UIGraphicsBeginImageContextWithOptions(CGSize(width: 80, height: 80), false, 0)
         SCLAlertViewStyleKit.drawCross()
-        Cache.imageOfCross = UIGraphicsGetImageFromCurrentImageContext()
+        Cache.imageOfCross = UIGraphicsGetImageFromCurrentImageContext()?.withTintColor(.systemBackground)
         UIGraphicsEndImageContext()
         return Cache.imageOfCross!
     }
@@ -1656,7 +1325,7 @@ class SCLAlertViewStyleKit : NSObject {
         }
         UIGraphicsBeginImageContextWithOptions(CGSize(width: 80, height: 80), false, 0)
         SCLAlertViewStyleKit.drawNotice()
-        Cache.imageOfNotice = UIGraphicsGetImageFromCurrentImageContext()
+        Cache.imageOfNotice = UIGraphicsGetImageFromCurrentImageContext()?.withTintColor(.systemBackground)
         UIGraphicsEndImageContext()
         return Cache.imageOfNotice!
     }
@@ -1678,7 +1347,7 @@ class SCLAlertViewStyleKit : NSObject {
         }
         UIGraphicsBeginImageContextWithOptions(CGSize(width: 80, height: 80), false, 0)
         SCLAlertViewStyleKit.drawInfo()
-        Cache.imageOfInfo = UIGraphicsGetImageFromCurrentImageContext()
+        Cache.imageOfInfo = UIGraphicsGetImageFromCurrentImageContext()?.withTintColor(.systemBackground)
         UIGraphicsEndImageContext()
         return Cache.imageOfInfo!
     }
@@ -1689,7 +1358,7 @@ class SCLAlertViewStyleKit : NSObject {
         }
         UIGraphicsBeginImageContextWithOptions(CGSize(width: 80, height: 80), false, 0)
         SCLAlertViewStyleKit.drawEdit()
-        Cache.imageOfEdit = UIGraphicsGetImageFromCurrentImageContext()
+        Cache.imageOfEdit = UIGraphicsGetImageFromCurrentImageContext()?.withTintColor(.systemBackground)
         UIGraphicsEndImageContext()
         return Cache.imageOfEdit!
     }
@@ -1700,14 +1369,33 @@ class SCLAlertViewStyleKit : NSObject {
         }
         UIGraphicsBeginImageContextWithOptions(CGSize(width: 80, height: 80), false, 0)
         SCLAlertViewStyleKit.drawQuestion()
-        Cache.imageOfQuestion = UIGraphicsGetImageFromCurrentImageContext()
+        Cache.imageOfQuestion = UIGraphicsGetImageFromCurrentImageContext()?.withTintColor(.systemBackground)
         UIGraphicsEndImageContext()
         return Cache.imageOfQuestion!
     }
+    
 }
 
 extension SCLAlertView {
   var subViewsWidth: CGFloat {
     return appearance.kWindowWidth - 2 * appearance.margin.horizontal
   }
+}
+
+fileprivate extension UIColor {
+    convenience init(light: UIColor, dark: UIColor) {
+        self.init(dynamicProvider: { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark ? dark : light
+        })
+    }
+
+    static var defaultBackgroundColor: UIColor = .systemBackground
+    
+    static var defaultTitleColor: UIColor = .label
+    
+    static var defaultSubTitleColor: UIColor {
+        return UIColor(light: UIColorFromRGB(0x4D4D4D), dark: UIColorFromRGB(0xADADAD))
+    }
+    
+    static var defaultButtonTitleColor: UIColor = .systemBackground
 }
